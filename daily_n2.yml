@@ -1,0 +1,43 @@
+name: 每日 JLPT N2 學習表生成
+
+on:
+  schedule:
+    # 每天 02:00 UTC = 台灣時間 10:00
+    - cron: "0 2 * * *"
+  workflow_dispatch:  # 允許手動觸發（測試用）
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 取得 Repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 設定 Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. 生成當天 Word 檔
+      - name: Generate N2 Word document
+        run: |
+          mkdir -p docs
+          python scripts/generate_n2.py
+          mv JLPT_N2_*.docx docs/
+
+      # 4. 設定 Git 使用者
+      - name: Configure Git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 5. Commit & Push
+      - name: Commit and push
+        run: |
+          git add docs/
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "📚 N2 每日學習表 $(TZ='Asia/Taipei' date '+%Y-%m-%d')"
+          git push
