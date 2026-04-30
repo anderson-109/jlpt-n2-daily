@@ -6,6 +6,13 @@ on:
     - cron: "0 2 * * *"
   workflow_dispatch:  # 允許手動觸發（測試用）
 
+# 給予 Actions 寫入權限
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   generate-and-commit:
     runs-on: ubuntu-latest
